@@ -20,12 +20,7 @@
     overflow: hidden;
   }
 
-  #countdown {
-    font-size: 2rem;
-    margin-bottom: 20px;
-  }
-
-  #openBtn {
+  #openBtn, #surpriseBtn {
     padding: 12px 28px;
     font-size: 1.2rem;
     border: none;
@@ -34,9 +29,10 @@
     color: #fff;
     cursor: pointer;
     transition: transform 0.2s;
-    display:none; /* Hidden until countdown ends */
   }
-  #openBtn:hover { transform: scale(1.08); }
+  #openBtn:hover, #surpriseBtn:hover { transform: scale(1.08); }
+
+  #surpriseBtn { display: none; margin-top: 20px; }
 
   .cake-container { position: relative; display: none; }
 
@@ -103,12 +99,11 @@
 </head>
 <body>
 
-<div id="countdown"></div>
 <button id="openBtn">Open Cake!</button>
-
 <div id="bigMessage">Happy Birthday Daddy ❤️</div>
 <div id="extraMessage">Eat me out</div>
 <div id="finalMessage">...I mean the cake 😇</div>
+<button id="surpriseBtn">Tap me for another surprise</button>
 
 <div class="cake-container" id="cakeContainer">
   <model-viewer id="cake3d" src="cake.glb" alt="3D Birthday Cake"
@@ -117,15 +112,14 @@
   <div class="candles" id="candles">
     <div class="candle"><div class="flame"></div><div class="candle-body"></div></div>
     <div class="candle"><div class="flame"></div><div class="candle-body"></div></div>
-    <div class="candle"><div class="flame"></div><div class="candle-body"></div></div>
   </div>
 </div>
 
 <div id="hintMessage">Blow on the cake....like literally</div>
 
 <script>
-const countdownEl = document.getElementById('countdown');
 const openBtn = document.getElementById('openBtn');
+const surpriseBtn = document.getElementById('surpriseBtn');
 const cakeContainer = document.getElementById('cakeContainer');
 const cake3d = document.getElementById('cake3d');
 const hintMessage = document.getElementById('hintMessage');
@@ -135,27 +129,7 @@ const extraMessage = document.getElementById('extraMessage');
 const finalMessage = document.getElementById('finalMessage');
 let candlesLit = true;
 
-// Countdown until 23rd October 00:00 CET
-const targetDate = new Date(Date.UTC(new Date().getFullYear(), 9, 22, 22, 0, 0)); 
-function updateCountdown(){
-  const now = new Date();
-  let diff = targetDate - now;
-  if(diff <= 0){
-    countdownEl.style.display = 'none';
-    openBtn.style.display = 'inline-block';
-    clearInterval(countdownInterval);
-    return;
-  }
-  const days = Math.floor(diff / (1000*60*60*24));
-  const hours = Math.floor((diff / (1000*60*60)) % 24);
-  const minutes = Math.floor((diff / (1000*60)) % 60);
-  const seconds = Math.floor((diff / 1000) % 60);
-  countdownEl.textContent = `🎉 youll be my oldie bernie in ${days}d ${hours}h ${minutes}m ${seconds}s 🎉`;
-}
-updateCountdown();
-const countdownInterval = setInterval(updateCountdown,1000);
-
-// Show cake container & confetti
+// Show cake & confetti
 openBtn.addEventListener('click', ()=>{
   openBtn.style.display='none';
   cakeContainer.style.display='block';
@@ -227,11 +201,26 @@ function blowCandles(){
   setTimeout(()=>bigMessage.style.opacity='1',100);
 
   setTimeout(()=>{ extraMessage.style.display='block'; extraMessage.classList.add('fade-in'); },3000);
-  setTimeout(()=>{ finalMessage.style.display='block'; finalMessage.classList.add('fade-in'); },7000);
+
+  // Show final message
+  setTimeout(()=>{
+    finalMessage.style.display='block';
+    finalMessage.classList.add('fade-in');
+
+    // Show surprise button 5 seconds after final message
+    setTimeout(()=>{
+      surpriseBtn.style.display='inline-block';
+    }, 5000);
+
+  },7000);
 
   launchBalloons();
 }
+
+// Surprise button click
+surpriseBtn.addEventListener('click', ()=>{
+  window.location.href = 'envelopes.html'; // new page with envelopes
+});
 </script>
 </body>
 </html>
-
