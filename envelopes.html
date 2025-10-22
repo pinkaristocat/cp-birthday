@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Birthday Envelopes</title>
+<style>
+  body {
+    margin: 0;
+    background: #ffc4e1;
+    overflow: hidden;
+    font-family: "Poppins", sans-serif;
+    height: 100vh;
+    width: 100vw;
+    position: relative;
+  }
+
+  .envelope {
+    position: absolute;
+    cursor: pointer;
+    z-index: 1;
+    perspective: 400px; /* for flap animation */
+  }
+
+  .envelope-inner {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.6s;
+  }
+
+  /* Envelope body */
+  .envelope-body {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: #ff6b6b;
+    border: 2px solid #fff;
+    border-radius: 6px;
+    z-index: 1;
+  }
+
+  /* Envelope flap */
+  .envelope-flap {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 50%;
+    background: #ff4b4b;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    transform-origin: top;
+    transition: transform 0.5s;
+    z-index: 2;
+    clip-path: polygon(0 0, 50% 100%, 100% 0);
+  }
+
+  .envelope.open .envelope-flap {
+    transform: rotateX(180deg);
+  }
+
+  .envelope-text {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: bold;
+    pointer-events: none;
+    z-index: 3;
+  }
+
+  /* Message overlay */
+  .message {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    background: #fff;
+    color: #333;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    z-index: 50;
+    width: 300px;
+    text-align: center;
+    font-size: 1.1rem;
+    transition: transform 0.4s, opacity 0.4s;
+    opacity: 0;
+  }
+
+  .message.show {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+
+  .close-btn {
+    margin-top: 15px;
+    background: #ff6b6b;
+    border: none;
+    color: #fff;
+    padding: 8px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.3s;
+  }
+
+  .close-btn:hover {
+    background: #ff4b4b;
+  }
+</style>
+</head>
+<body>
+
+<script>
+const notes = [
+  "youre the best and smartest bernie anyone can get in their life.",
+  "i tried ordering a cheesecake for you, sadly youre in such a corner of world, which i have no idea about:( why tf are restaurants selling packaged cakes:( ill get you your cake as soon as youre back? maybe we can have cheesecake, rosé and lots of sex?",
+  "the year went by so quick, or maybe it dint idk it feels just like yesterday you were in bangalore and i was fighting so much with you for not giving me time. but i have no regrets, you shouldnt either. where else would you get such an amazing girl who would make you pink birthday website",
+  "i hope this year be the best year of your life and you can afford to get all sorts of luxuries you want, and not go broke in the process.",
+  "fuck it im gonna rush thru these messages its 3 fucking 18 ugh",
+  "im very horny rn fyi, so idk most of it might be sexual but whatever, you have a very pretty dick, ill teach you how to do a stripshow hhahaha",
+  ".",
+  ".",
+  ".",
+  ".",
+  ".",
+  ".",
+  "i love you so much, it practically hurts to even see what we have going down the hill, so make it stop whatever it is",
+  "im sorry for being kinda bitchy to you for a long while, but it wasnt without cause. whatever lets begin blank this year. hello stranger?",
+  "i promise to take more initiative to talk and be more interested in stuff you tell me about, even if its tech, but you have to be more interested in me too come on, i feel like a buddhi aurat jo bas aake ladti hai apne pati se",
+  "also please plan the fucking rajasthan trip bro or ill ghost you and go solo",
+  "this year i hope we get lots of meets and fucks and idk gucci bagggssssssssss (pateks for you?)",
+  "would you like to see some birthday boobies? convince me and i might show some hehe",
+  "i miss the nights where i could just keep you all to myself even when you were sleepy, just by sending an ashleel picture.",
+  "i still feel sad about the cheesecake thing, very sad. you live in a small town for fucks sake. i found bakeries in zurich which deliver, but your town is hell",
+  "can i still call you cp? im not a child anymore:( youre an adult predator now",
+  "1.5 months until you can claim your real gift tho hehe",
+  "i cant wait to spend lots of coming years with you, even fighting with you is fun. if you remember i find lots of joy in fighting lol, and there will be lots of it in our lives, since im for keeps remember?",
+  "p.s. i found the perfect red ribbon for your birthday gift hehe"
+];
+
+const envelopeCount = 24;
+const rows = 4;
+const cols = 6;
+const padding = 20;
+
+const cellWidth = window.innerWidth / cols;
+const cellHeight = window.innerHeight / rows;
+
+for (let i = 0; i < envelopeCount; i++) {
+  const env = document.createElement('div');
+  env.classList.add('envelope');
+
+  const width = 80 + Math.random() * 40;
+  const height = width * 0.66;
+
+  const row = Math.floor(i / cols);
+  const col = i % cols;
+
+  const x = col * cellWidth + Math.random() * (cellWidth - width - padding);
+  const y = row * cellHeight + Math.random() * (cellHeight - height - padding);
+
+  env.style.width = width + 'px';
+  env.style.height = height + 'px';
+  env.style.left = x + 'px';
+  env.style.top = y + 'px';
+
+  env.innerHTML = `
+    <div class="envelope-inner">
+      <div class="envelope-body"></div>
+      <div class="envelope-flap"></div>
+      <div class="envelope-text">Msg ${i+1}</div>
+    </div>
+  `;
+
+  env.addEventListener('click', () => {
+    env.classList.add('open');
+
+    const msg = document.createElement('div');
+    msg.classList.add('message');
+    msg.innerHTML = `
+      <h2>🎉 Message ${i+1} 🎉</h2>
+      <p>${notes[i]}</p>
+      <button class="close-btn">Close</button>
+    `;
+    document.body.appendChild(msg);
+
+    setTimeout(() => msg.classList.add('show'), 50);
+
+    msg.querySelector('.close-btn').addEventListener('click', () => {
+      msg.classList.remove('show');
+      setTimeout(() => msg.remove(), 400);
+      env.classList.remove('open');
+    });
+  });
+
+  document.body.appendChild(env);
+}
+</script>
+
+</body>
+</html>
