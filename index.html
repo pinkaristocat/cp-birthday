@@ -152,6 +152,8 @@ function updateCountdown(){
   const seconds = Math.floor((diff / 1000) % 60);
   countdownEl.textContent = `🎉 You will be an oldie in ${days}d ${hours}h ${minutes}m ${seconds}s 🎉`;
 }
+
+}
 updateCountdown();
 const countdownInterval = setInterval(updateCountdown,1000);
 
@@ -234,4 +236,5 @@ function blowCandles(){
 </script>
 </body>
 </html>
+
 
