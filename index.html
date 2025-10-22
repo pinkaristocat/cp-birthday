@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Happy Birthday CP</title>
+<title>Happy Birthday – Pink Cake</title>
 <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 <style>
@@ -150,9 +150,7 @@ function updateCountdown(){
   const hours = Math.floor((diff / (1000*60*60)) % 24);
   const minutes = Math.floor((diff / (1000*60)) % 60);
   const seconds = Math.floor((diff / 1000) % 60);
-  countdownEl.textContent = `🎉 You will be an oldie in ${days}d ${hours}h ${minutes}m ${seconds}s 🎉`;
-}
-
+  countdownEl.textContent = `🎉 Cake available in ${days}d ${hours}h ${minutes}m ${seconds}s 🎉`;
 }
 updateCountdown();
 const countdownInterval = setInterval(updateCountdown,1000);
@@ -236,5 +234,3 @@ function blowCandles(){
 </script>
 </body>
 </html>
-
-
