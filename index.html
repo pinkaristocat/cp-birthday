@@ -20,6 +20,11 @@
     overflow: hidden;
   }
 
+  #countdown {
+    font-size: 2rem;
+    margin-bottom: 20px;
+  }
+
   #openBtn {
     padding: 12px 28px;
     font-size: 1.2rem;
@@ -29,6 +34,7 @@
     color: #fff;
     cursor: pointer;
     transition: transform 0.2s;
+    display:none; /* Hidden until countdown ends */
   }
   #openBtn:hover { transform: scale(1.08); }
 
@@ -47,7 +53,7 @@
     top: 110px;
     left: 50%;
     transform: translateX(-50%);
-    display: none; /* hide until model loads */
+    display: none;
     gap: 40px;
     pointer-events: none;
   }
@@ -97,6 +103,7 @@
 </head>
 <body>
 
+<div id="countdown"></div>
 <button id="openBtn">Open Cake!</button>
 
 <div id="bigMessage">Happy Birthday Daddy ❤️</div>
@@ -104,7 +111,6 @@
 <div id="finalMessage">...I mean the cake 😇</div>
 
 <div class="cake-container" id="cakeContainer">
-  <!-- Removed auto-rotate -->
   <model-viewer id="cake3d" src="cake.glb" alt="3D Birthday Cake"
     camera-controls ar ar-modes="webxr scene-viewer quick-look" preload></model-viewer>
 
@@ -118,6 +124,7 @@
 <div id="hintMessage">Blow on the cake....like literally</div>
 
 <script>
+const countdownEl = document.getElementById('countdown');
 const openBtn = document.getElementById('openBtn');
 const cakeContainer = document.getElementById('cakeContainer');
 const cake3d = document.getElementById('cake3d');
@@ -128,22 +135,41 @@ const extraMessage = document.getElementById('extraMessage');
 const finalMessage = document.getElementById('finalMessage');
 let candlesLit = true;
 
-// Show cake container immediately
+// Countdown until 23rd October 00:00 CET
+const targetDate = new Date(Date.UTC(new Date().getFullYear(), 9, 22, 22, 0, 0)); 
+function updateCountdown(){
+  const now = new Date();
+  let diff = targetDate - now;
+  if(diff <= 0){
+    countdownEl.style.display = 'none';
+    openBtn.style.display = 'inline-block';
+    clearInterval(countdownInterval);
+    return;
+  }
+  const days = Math.floor(diff / (1000*60*60*24));
+  const hours = Math.floor((diff / (1000*60*60)) % 24);
+  const minutes = Math.floor((diff / (1000*60)) % 60);
+  const seconds = Math.floor((diff / 1000) % 60);
+  countdownEl.textContent = `🎉 Cake available in ${days}d ${hours}h ${minutes}m ${seconds}s 🎉`;
+}
+updateCountdown();
+const countdownInterval = setInterval(updateCountdown,1000);
+
+// Show cake container & confetti
 openBtn.addEventListener('click', ()=>{
   openBtn.style.display='none';
   cakeContainer.style.display='block';
 
-  // Start confetti immediately
   const duration = 4000;
   const end = Date.now() + duration;
   (function frame() {
-    confetti({ particleCount: 8, angle:60, spread:55, origin:{x:0} });
-    confetti({ particleCount: 8, angle:120, spread:55, origin:{x:1} });
+    confetti({ particleCount:8, angle:60, spread:55, origin:{x:0} });
+    confetti({ particleCount:8, angle:120, spread:55, origin:{x:1} });
     if(Date.now()<end) requestAnimationFrame(frame);
   })();
 });
 
-// When 3D cake finishes loading, show both cake and candles together
+// Show cake & candles together when model loads
 cake3d.addEventListener('load', ()=>{
   cake3d.style.opacity='1';
   candles.style.display='flex';
@@ -152,37 +178,36 @@ cake3d.addEventListener('load', ()=>{
 });
 
 // Blow detection
-async function initBlowDetection() {
-  try {
+async function initBlowDetection(){
+  try{
     const stream = await navigator.mediaDevices.getUserMedia({ audio:true });
     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
     const source = audioContext.createMediaStreamSource(stream);
     const analyser = audioContext.createAnalyser();
     source.connect(analyser);
-    analyser.fftSize=256;
+    analyser.fftSize = 256;
     const dataArray = new Uint8Array(analyser.frequencyBinCount);
-
-    function detectBlow() {
+    function detectBlow(){
       analyser.getByteFrequencyData(dataArray);
-      let sum=0;
+      let sum = 0;
       for(let i=0;i<dataArray.length;i++) sum+=dataArray[i];
-      const avg=sum/dataArray.length;
+      const avg = sum/dataArray.length;
       if(avg>50 && candlesLit) blowCandles();
       if(candlesLit) requestAnimationFrame(detectBlow);
     }
     detectBlow();
-  } catch(err){
+  }catch(err){
     alert('Microphone access is needed to blow out the candles!');
   }
 }
 
 // Balloons
 function createBalloon(){
-  const balloon=document.createElement('div');
+  const balloon = document.createElement('div');
   balloon.classList.add('balloon');
-  const colors=['#ff3b8d','#ffb3c1','#ff6b6b','#ff9fcf','#ffe066'];
-  balloon.style.backgroundColor=colors[Math.floor(Math.random()*colors.length)];
-  balloon.style.left=Math.random()*90+'vw';
+  const colors = ['#ff3b8d','#ffb3c1','#ff6b6b','#ff9fcf','#ffe066'];
+  balloon.style.backgroundColor = colors[Math.floor(Math.random()*colors.length)];
+  balloon.style.left = Math.random()*90+'vw';
   balloon.style.setProperty('--sway',(Math.random()*100-50)+'px');
   document.body.appendChild(balloon);
   setTimeout(()=>balloon.remove(),6000);
@@ -191,8 +216,8 @@ function launchBalloons(count=15){
   for(let i=0;i<count;i++){ setTimeout(createBalloon,i*300); }
 }
 
-// Blow candles
-function blowCandles() {
+// Blow candles & show messages
+function blowCandles(){
   candlesLit=false;
   cake3d.style.filter="brightness(0.7)";
   hintMessage.style.display='none';
@@ -207,6 +232,5 @@ function blowCandles() {
   launchBalloons();
 }
 </script>
-
 </body>
 </html>
